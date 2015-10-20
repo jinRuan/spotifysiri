@@ -1,0 +1,93 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Example of the Authorization Code flow with Spotify</title>
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <style type="text/css">
+      #login, #loggedin {
+        display: none;
+      }
+      .text-overflow {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        width: 500px;
+      }
+    </style>
+  </head>
+
+  <body>
+<textarea id="results" cols="80" rows="5"></textarea>
+
+  <p id ="hi">hi</p>
+    
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <script>
+      
+    //logic for speech begins here
+
+    var recognition = new webkitSpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+ 
+    recognition.onresult = function (e) {
+        var textarea = document.getElementById('results');
+        for (var i = e.resultIndex; i < e.results.length; ++i) {
+            if (e.results[i].isFinal) {
+                textarea.value += e.results[i][0].transcript;
+                var splittext = textarea.value.split(" ")
+                if(splittext[0]=="play" || splittext[0]=="Play"){
+                    var byartist = splittext.indexOf("by");
+                    if (byartist===parseInt(byartist, 10)){
+                        for (var x = 1; x<byartist; x++){
+                            var finalname;
+                            finalname += splittext[x] +  " ";
+                            if (finalname.substring(0, 9) == "undefined"){
+                              finalname = finalname.substring("undefined".length, finalname.length);
+                            };
+                            
+                        };
+                        console.log(finalname);
+                        for (var y = byartist + 1; y<splittext.length; y++){
+                            var finalartist;
+                            finalartist += splittext[y];
+                            finalartist = finalartist.substring("undefined".length, finalartist.length);
+                        };
+                        console.log(finalname);
+                        console.log(finalartist);
+
+                            var the_url = "https://api.spotify.com/v1/search?q="+finalname+"&type=track&limit=1";
+                            textarea.value = "";
+
+                            $.ajax({
+                              url: the_url,
+                              dataType: 'json',
+                              type: 'get',
+                              success: function(data) {
+                                var json_response = data;
+                                console.log(data.tracks.items[0].external_urls.spotify);
+                                window.open(data.tracks.items[0].external_urls.spotify);
+                      
+                              }
+                            });
+                          
+
+                    };
+                };
+            }
+        }
+    }
+ 
+    // start listening
+
+    $('#hi').click(function(){
+            recognition.start();
+
+    });
+    //recognition.start();
+  
+    </script>
+</html>
+
